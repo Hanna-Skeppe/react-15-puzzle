@@ -1,3 +1,30 @@
+import { IBrick } from './types/types';
+
+// Checks if the order (0 = space) can be solved to 1, 2, ..., 0:
+export const isSolvable = (
+  arr: number[],
+  rows: number,
+  columns: number
+): boolean => {
+  const bricks = arr.filter((value) => value !== 0);
+
+  // Count pairs of bricks in the wrong order (inversions):
+  let inversions = 0;
+  for (let i = 0; i < bricks.length; i++) {
+    for (let j = i + 1; j < bricks.length; j++) {
+      if (bricks[i] > bricks[j]) inversions++;
+    }
+  }
+
+  // Odd width: moves never change the parity of inversions.
+  if (columns % 2 === 1) return inversions % 2 === 0;
+
+  // Even width: a vertical move flips the parity of inversions, so the
+  // row of the space (counted from the bottom) must be included:
+  const spaceRowFromBottom = rows - 1 - Math.floor(arr.indexOf(0) / columns);
+  return (inversions + spaceRowFromBottom) % 2 === 0;
+};
+
 export const createShuffledArray = (
   rows: number,
   columns: number
@@ -9,6 +36,15 @@ export const createShuffledArray = (
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  // Half of all shuffles are unsolvable. Swapping two bricks (not the space)
+  // flips the parity and makes the puzzle solvable:
+  if (!isSolvable(arr, rows, columns)) {
+    const [a, b] = arr
+      .map((value, index) => (value !== 0 ? index : -1))
+      .filter((index) => index !== -1);
+    [arr[a], arr[b]] = [arr[b], arr[a]];
   }
 
   // Assign value and positions to elements:
@@ -95,26 +131,21 @@ export const updateBrickPosition = (
 };
 
 export const checkWin = (bricks: IBrick[]) => {
-  let isInOrder = true;
-  let spaceAtStartOrEnd = false;
+  const lastIndex = bricks.length - 1;
 
-  for (let i = 0; i < bricks.length; i++) {
-    const value = bricks[i].value;
-
-    //Check if all bricks are in order
-    if (i < bricks.length - 1 && value !== i + 1) {
-      isInOrder = false;
-      break;
-    }
-    // Check if space (0) is first or last
-    if (value === 0) {
-      if (i === 0 || i === bricks.length - 1) {
-        spaceAtStartOrEnd = true;
-      } else {
-        isInOrder = false;
-        spaceAtStartOrEnd = false;
-      }
-    }
+  // Check if all bricks are in order
+  for (let i = 0; i < lastIndex; i++) {
+    if (bricks[i].value !== i + 1) return false;
   }
-  return isInOrder && spaceAtStartOrEnd;
+
+  // Check if space (0) is last:
+  return bricks[lastIndex].value === 0;
+};
+
+export const isMoveable = (brick: IBrick, space: IBrick) => {
+  return (
+    brick.value !== 0 &&
+    (brick.position.x === space.position.x ||
+      brick.position.y === space.position.y)
+  );
 };
