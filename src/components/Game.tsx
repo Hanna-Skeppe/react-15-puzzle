@@ -72,11 +72,17 @@ function Game() {
         <h1 className="text-black font-semibold text-2xl mb-2 sm:text-3xl md:text-4xl md:mb-4">
           {win ? `Grattis! Du vann med ${moveCount} drag 🥳` : 'N-pussel'}
         </h1>
-        <p>Klicka på en bricka i samma rad eller kolumn som den tomma rutan.</p>
-        <p>
-          Du har vunnit när alla brickor är ordnade från 1 till
-          {` ${numberOfBricks}`} med en tom ruta längst ner till höger.
-        </p>
+        {!win ? (
+          <>
+            <p>
+              Klicka på en bricka i samma rad eller kolumn som den tomma rutan.
+            </p>
+            <p>
+              Du har vunnit när alla brickor är ordnade från 1 till
+              {` ${numberOfBricks}`} med en tom ruta längst ner till höger.
+            </p>
+          </>
+        ) : null}
         <p aria-live="polite" className="sr-only">
           {announcement}
         </p>
