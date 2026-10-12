@@ -13,9 +13,8 @@ import { BOARD_SIZES } from 'src/constants';
 
 function Game() {
   const [size, setSize] = useState({
-    rows: Number(import.meta.env.VITE_DEFAULT_ROWS) || BOARD_SIZES[2].rows,
-    columns:
-      Number(import.meta.env.VITE_DEFAULT_COLUMNS) || BOARD_SIZES[2].columns,
+    rows: BOARD_SIZES[2].rows,
+    columns: BOARD_SIZES[2].columns,
   });
   const [bricks, setBricks] = useState(() =>
     createShuffledArray(size.rows, size.columns)
@@ -64,14 +63,20 @@ function Game() {
     if (win) shuffleButtonRef.current?.focus();
   }, [win]);
 
+  const numberOfBricks = size.rows * size.columns - 1;
+
   return (
     <div className="flex flex-col justify-center items-center">
       {win ? <Confetti width={width} height={height} /> : null}
       <div className="m-10">
-        <p className="text-black font-semibold text-2xl sm:text-3xl md:text-4xl">
+        <h1 className="text-black font-semibold text-2xl mb-2 sm:text-3xl md:text-4xl md:mb-4">
           {win ? `Grattis! Du vann med ${moveCount} drag 🥳` : 'N-pussel'}
+        </h1>
+        <p>Klicka på en bricka i samma rad eller kolumn som den tomma rutan.</p>
+        <p>
+          Du har vunnit när alla brickor är ordnade från 1 till
+          {` ${numberOfBricks}`} med en tom ruta längst ner till höger.
         </p>
-
         <p aria-live="polite" className="sr-only">
           {announcement}
         </p>
